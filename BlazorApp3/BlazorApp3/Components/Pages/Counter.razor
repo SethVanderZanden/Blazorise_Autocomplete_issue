@@ -1,0 +1,61 @@
+﻿@page "/counter"
+@using BlazorApp3.Common
+@rendermode InteractiveServer
+@using Blazorise.Components
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<Autocomplete TItem="CountryData"
+              TValue="CountryData"
+              Data="@Countries"
+              TextField="@(( item ) => item.Name)"
+              ValueField="@(( item ) => item)"
+              @bind-SelectedValue="@selectedSearchValue"
+              @bind-SelectedText="selectedAutoCompleteText"
+              Placeholder="Search..."
+              Filter="AutocompleteFilter.StartsWith"
+              FreeTyping
+              CustomFilter="@(( item, searchValue ) => item.Name.IndexOf( searchValue, 0, StringComparison.CurrentCultureIgnoreCase ) >= 0 )">
+    <NotFoundContent> Sorry... @context was not found! :( </NotFoundContent>
+</Autocomplete>
+
+<Autocomplete TItem="CountryData"
+              TValue="CountryData"
+              Data="@Countries"
+              TextField="@(( item ) => item.Name)"
+              ValueField="@(( item ) => item)"
+              Placeholder="Search..."
+              SelectionMode="AutocompleteSelectionMode.Multiple"
+              FreeTyping
+              @bind-SelectedValues="multipleSelectionData"
+              @bind-SelectedTexts="multipleSelectionTexts">
+</Autocomplete>
+
+
+@code {
+    [Inject] public CountryService CountryService { get; set; } = default!;
+    public IEnumerable<CountryData> Countries;
+    
+    public CountryData? SelectedCountry { get; set; }
+    
+    List<CountryData> multipleSelectionData;
+    List<string> multipleSelectionTexts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        Countries = await CountryService.GetCountryDataAsync();
+        
+        multipleSelectionData = new List<CountryData>() { Countries.ElementAt( 1 ) };
+
+        SelectedCountry = Countries.First();
+    }
+
+    public CountryData selectedSearchValue { get; set; }
+    public string selectedAutoCompleteText { get; set; }
+
+    
+}
